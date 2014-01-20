@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                hackage-uploader
-version:             0.2.0.3
+version:             0.2.0.4
 description:         Upload a package on Hackage, building its docs
 license:             MIT
 license-file:        LICENSE
@@ -33,4 +33,7 @@ executable hackage-uploader
     Main.hs
   build-depends:
       base >= 4.6 && < 5.0,
-      hackage-uploader >= 0.2.0.3
+      text >= 0.11 && < 1.0.0.0,
+      shelly >= 1.4.1,
+      directory >= 1.2.0.1,
+      hackage-uploader >= 0.2.0.4
