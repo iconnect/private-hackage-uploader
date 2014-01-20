@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                hackage-uploader
-version:             0.1.0.0
+version:             0.2.0.0
 description:         Upload a package on Hackage, building its docs
 license:             MIT
 license-file:        LICENSE

@@ -9,6 +9,7 @@ module Distribution.Hackage.Upload
        , UploadStatus(..)
        , PackageName
        , buildAndUploadPackage
+       , hackageUpload
        , uploadDocs) where
 
 import Prelude hiding (FilePath)
@@ -37,6 +38,12 @@ data HackageSettings = HackageSettings {
 --------------------------------------------------------------------------------
 data UploadStatus = Uploaded | Skipped deriving Show
 
+
+--------------------------------------------------------------------------------
+hackageUpload :: HackageSettings -> IO ()
+hackageUpload settings = shellyNoDir $ verbosely $ do
+  status <- buildAndUploadPackage settings
+  uploadDocs status settings
 
 --------------------------------------------------------------------------------
 cabal :: [T.Text] -> Sh ()
