@@ -70,17 +70,19 @@ contentsLocation HackageSettings{..} =
 
 --------------------------------------------------------------------------------
 -- This is horrible, and hopefully will go away in the future.
-stripDevFlags :: Sh ()
-stripDevFlags = do
+stripDevFlags :: HackageSettings -> Sh ()
+stripDevFlags HackageSettings{..} = do
+  let manifest = T.pack hackagePackageName <> ".cabal"
+  let bakFile  = manifest <> ".bak"
   let removeHpcIf = T.pack "/.*if.*flag.*(hpc).*$/d"
   let removeHpc = T.pack "/.*ghc-options:.*-fhpc.*$/d"
   let removeWError = T.pack "/.*-Werror.*$/d"
-  run_ "sed" ["-i.bak", removeHpcIf, "atlas.cabal"]
-  run_ "rm" ["-rf", "atlas.cabal.bak"]
-  run_ "sed" ["-i.bak", removeHpc, "atlas.cabal"]
-  run_ "rm" ["-rf", "atlas.cabal.bak"]
-  run_ "sed" ["-i.bak", removeWError, "atlas.cabal"]
-  run_ "rm" ["-rf", "atlas.cabal.bak"]
+  run_ "sed" ["-i.bak", removeHpcIf, manifest]
+  run_ "rm" ["-rf", bakFile]
+  run_ "sed" ["-i.bak", removeHpc, manifest]
+  run_ "rm" ["-rf", bakFile]
+  run_ "sed" ["-i.bak", removeWError, manifest]
+  run_ "rm" ["-rf", bakFile]
 
 
 --------------------------------------------------------------------------------
@@ -115,7 +117,7 @@ buildAndUploadPackage settings@HackageSettings{..} = do
         run_ "rm"  ["-rf", toTextIgnore fileName]
         run_ "tar" ["-xzf", toTextIgnore fileName <> ".tar.gz"]
         run_ "rm"  ["-rf", toTextIgnore fileName <> ".tar.gz"]
-        chdir fileName stripDevFlags
+        chdir fileName (stripDevFlags settings)
         run_ "tar" ["-czf", toTextIgnore fileName <> ".tar.gz", toTextIgnore fileName]
         echo "Uploading package to Hackage..."
         cabal ["upload", "-v3", "-u", hackageUser, "-p", hackagePwd, tarball fileName]
