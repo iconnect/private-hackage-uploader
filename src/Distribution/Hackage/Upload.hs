@@ -154,7 +154,7 @@ uploadDocs status settings@HackageSettings{..} =
         run_ "mkdir" ["-p", "dist/doc/html"]
         chdir "dist/doc/html" $ do
           run_ "cp"  ["-r", T.pack hackagePackageName, docsFilename]
-          run_ "tar" ["-cvz", "-Hustar",
+          run_ "gtar" ["-cvz", "-Hustar",
                       "-f", docsTarball, docsFilename]
           echo "Uploading docs to Hackage..."
           run_ "curl" ["-X", "PUT",
