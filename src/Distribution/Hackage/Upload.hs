@@ -142,11 +142,12 @@ uploadDocs status settings@HackageSettings{..} =
                                     (T.unpack hackagePackageVersion)
         let docsTarball = docsFilename <> ".tar.gz"
         alreadyGenerated <- liftIO (doesFileExist . T.unpack $ "dist/doc/html/" <> docsTarball)
-        unless alreadyGenerated $ errExit False $ do
+        unless alreadyGenerated $ do
           cabal ["haddock", "--hyperlink-source",
-               htmlLocation settings,
-               contentsLocation settings]
-          failed <- (/= 0) <$> lastExitCode
+                 htmlLocation settings,
+                 contentsLocation settings]
+          out <- lastStderr
+          let failed = "executables" `T.isInfixOf` out
           when failed $
             cabal ["haddock", "--hyperlink-source",
                    htmlLocation settings,
