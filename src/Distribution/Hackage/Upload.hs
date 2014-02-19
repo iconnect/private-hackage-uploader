@@ -145,15 +145,14 @@ uploadDocs status settings@HackageSettings{..} =
         unless alreadyGenerated $ do
           cabal ["haddock", "--hyperlink-source",
                  htmlLocation settings,
-                 contentsLocation settings]
+                 contentsLocation settings, "--executables"]
           out <- lastStderr
-          let failedBecauseExecutable = "executables" `T.isInfixOf` out
           let failedForTransitivity   = "transitive" `T.isInfixOf` out
-          when (not failedForTransitivity) $
-            when failedBecauseExecutable $
-              cabal ["haddock", "--hyperlink-source",
-                     htmlLocation settings,
-                     contentsLocation settings, "--executables"]
+          when failedForTransitivity $
+            -- back off and build only libraries
+            cabal ["haddock", "--hyperlink-source",
+                   htmlLocation settings,
+                   contentsLocation settings]
         run_ "mkdir" ["-p", "dist/doc/html"]
         chdir "dist/doc/html" $ do
           run_ "cp"  ["-r", T.pack hackagePackageName, docsFilename]
