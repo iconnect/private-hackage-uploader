@@ -41,7 +41,7 @@ data UploadStatus = Uploaded | Skipped deriving Show
 
 --------------------------------------------------------------------------------
 hackageUpload :: HackageSettings -> IO ()
-hackageUpload settings = shellyNoDir $ verbosely $ do
+hackageUpload settings = shelly $ verbosely $ do
   status <- buildAndUploadPackage settings
   uploadDocs status settings
 
@@ -142,7 +142,7 @@ uploadDocs status settings@HackageSettings{..} =
                                     (T.unpack hackagePackageVersion)
         let docsTarball = docsFilename <> ".tar.gz"
         alreadyGenerated <- liftIO (doesFileExist . T.unpack $ "dist/doc/html/" <> docsTarball)
-        unless alreadyGenerated $ do
+        unless alreadyGenerated $ errExit False $ do
           cabal ["haddock", "--hyperlink-source",
                  htmlLocation settings,
                  contentsLocation settings, "--executables"]
