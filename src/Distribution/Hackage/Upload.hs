@@ -154,9 +154,13 @@ buildAndUploadPackage settings@HackageSettings{..} = do
     distDir :: Uploader -> Sh FilePath
     distDir UPL_cabal = return "dist"
     distDir UPL_stack = do
+      platform <- T.init <$> run "uname" ["-s"]
+      let os = case platform of
+            "Darwin" -> "osx"
+            _        -> "linux" -- win not supported atm.
       rw <- T.words . T.init <$> run "find" [".stack-work"
                                             ,"-type", "d"
-                                            ,"-name", "build"]
+                                            ,"-regex '.*" <> os <> ".*/build'"]
       case rw of
         [] -> error "distDir UPL_stack: empty resultset!"
         x:_ -> return . fromText . fst . T.breakOnEnd "/" $ x
