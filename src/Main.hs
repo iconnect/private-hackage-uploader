@@ -14,8 +14,12 @@ main = do
        let settings = HackageSettings {
             hackageUrl = T.pack url
           , hackageUser = T.pack usr
+          , hackageWhiteList = [T.pack url]
           , hackagePwd  = T.pack pwd
+          , hackageUploader = UPL_cabal
           , hackagePackageName = pkg
+          , hackageBuildDocs = True
+          , hackagePrivatePackage = False
           , hackagePackageVersion = T.pack ver
        } in hackageUpload settings
      [pkg, ver, usr, pwd ] -> do
@@ -27,8 +31,12 @@ main = do
          let settings = HackageSettings {
               hackageUrl = T.pack "http://hackage.haskell.org"
             , hackageUser = T.pack usr
+            , hackageUploader = UPL_cabal
+            , hackageWhiteList = ["http://hackage.haskell.org"]
             , hackagePwd  = T.pack pwd
             , hackagePackageName = pkg
+            , hackageBuildDocs = True
+            , hackagePrivatePackage = False
             , hackagePackageVersion = T.pack ver
          }
          hackageUpload settings
