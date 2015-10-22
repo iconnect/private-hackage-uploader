@@ -1,0 +1,101 @@
+Configuring shelly-1.6.4...
+Building shelly-1.6.4...
+Preprocessing library shelly-1.6.4...
+[1 of 6] Compiling Shelly.Base      ( src/Shelly/Base.hs, .stack-work/dist/x86_64-osx/Cabal-1.22.4.0/build/Shelly/Base.o )
+
+src/Shelly/Base.hs:39:1: Warning:
+    The import of ‘ProcessHandle’
+    from module ‘System.Process’ is redundant
+
+src/Shelly/Base.hs:42:1: Warning:
+    The import of ‘liftM’ from module ‘Control.Monad’ is redundant
+
+src/Shelly/Base.hs:45:1: Warning:
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+
+src/Shelly/Base.hs:52:1: Warning:
+    The import of ‘Data.Monoid’ is redundant
+      except perhaps to import instances from ‘Data.Monoid’
+    To import instances alone, use: import Data.Monoid()
+[2 of 6] Compiling Shelly.Find      ( src/Shelly/Find.hs, .stack-work/dist/x86_64-osx/Cabal-1.22.4.0/build/Shelly/Find.o )
+
+src/Shelly/Find.hs:14:1: Warning:
+    The import of ‘Data.Monoid’ is redundant
+      except perhaps to import instances from ‘Data.Monoid’
+    To import instances alone, use: import Data.Monoid()
+
+src/Shelly/Find.hs:67:5: Warning:
+    This binding for ‘traverse’ shadows the existing binding
+      imported from ‘Prelude’ at src/Shelly/Find.hs:11:1-32
+      (and originally defined in ‘Data.Traversable’)
+[3 of 6] Compiling Shelly           ( src/Shelly.hs, .stack-work/dist/x86_64-osx/Cabal-1.22.4.0/build/Shelly.o )
+
+src/Shelly.hs:128:1: Warning:
+    The import of ‘Data.Monoid’ is redundant
+      except perhaps to import instances from ‘Data.Monoid’
+    To import instances alone, use: import Data.Monoid()
+
+src/Shelly.hs:320:13: Warning: Defined but not used: ‘fp’
+[4 of 6] Compiling Shelly.Lifted    ( src/Shelly/Lifted.hs, .stack-work/dist/x86_64-osx/Cabal-1.22.4.0/build/Shelly/Lifted.o )
+
+src/Shelly/Lifted.hs:103:1: Warning:
+    The import of ‘Data.Monoid’ is redundant
+      except perhaps to import instances from ‘Data.Monoid’
+    To import instances alone, use: import Data.Monoid()
+
+src/Shelly/Lifted.hs:116:1: Warning:
+    Module ‘Control.Monad.Trans.Error’ is deprecated:
+      Use Control.Monad.Trans.Except instead
+
+src/Shelly/Lifted.hs:141:11: Warning:
+    In the use of type constructor or class ‘Error’
+    (imported from Control.Monad.Trans.Error):
+    Deprecated: "Use Control.Monad.Trans.Except instead"
+
+src/Shelly/Lifted.hs:141:43: Warning:
+    In the use of type constructor or class ‘ErrorT’
+    (imported from Control.Monad.Trans.Error):
+    Deprecated: "Use Control.Monad.Trans.Except instead"
+
+src/Shelly/Lifted.hs:142:16: Warning:
+    In the use of data constructor ‘ErrorT’
+    (imported from Control.Monad.Trans.Error):
+    Deprecated: "Use Control.Monad.Trans.Except instead"
+
+src/Shelly/Lifted.hs:241:29: Warning:
+    In the use of type constructor or class ‘Error’
+    (imported from Control.Monad.Trans.Error):
+    Deprecated: "Use Control.Monad.Trans.Except instead"
+
+src/Shelly/Lifted.hs:242:29: Warning:
+    In the use of type constructor or class ‘ErrorT’
+    (imported from Control.Monad.Trans.Error):
+    Deprecated: "Use Control.Monad.Trans.Except instead"
+
+src/Shelly/Lifted.hs:243:18: Warning:
+    In the use of type constructor or class ‘ErrorT’
+    (imported from Control.Monad.Trans.Error):
+    Deprecated: "Use Control.Monad.Trans.Except instead"
+
+src/Shelly/Lifted.hs:245:9: Warning:
+    In the use of data constructor ‘ErrorT’
+    (imported from Control.Monad.Trans.Error):
+    Deprecated: "Use Control.Monad.Trans.Except instead"
+
+src/Shelly/Lifted.hs:246:41: Warning:
+    In the use of ‘runErrorT’
+    (imported from Control.Monad.Trans.Error):
+    Deprecated: "Use Control.Monad.Trans.Except instead"
+
+src/Shelly/Lifted.hs:247:31: Warning:
+    In the use of data constructor ‘ErrorT’
+    (imported from Control.Monad.Trans.Error):
+    Deprecated: "Use Control.Monad.Trans.Except instead"
+[5 of 6] Compiling Shelly.Pipe      ( src/Shelly/Pipe.hs, .stack-work/dist/x86_64-osx/Cabal-1.22.4.0/build/Shelly/Pipe.o )
+[6 of 6] Compiling Shelly.Unix      ( src/Shelly/Unix.hs, .stack-work/dist/x86_64-osx/Cabal-1.22.4.0/build/Shelly/Unix.o )
+In-place registering shelly-1.6.4...
+Installing library in
+/Users/adinapoli/.stack/snapshots/x86_64-osx/lts-3.10/7.10.2/lib/x86_64-osx-ghc-7.10.2/shelly-1.6.4-BvjswJnFlO979SAYXfCXJV
+Registering shelly-1.6.4...

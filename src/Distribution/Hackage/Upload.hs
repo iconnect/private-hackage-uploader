@@ -8,6 +8,7 @@ module Distribution.Hackage.Upload
        ( HackageSettings(..)
        , UploadStatus(..)
        , PackageName
+       , Uploader(..)
        , buildAndUploadPackage
        , hackageUpload
        , uploadDocs) where
@@ -24,14 +25,23 @@ import Data.Monoid
 --------------------------------------------------------------------------------
 type PackageName = String
 
+--------------------------------------------------------------------------------
+data Uploader =
+    UPL_cabal
+  | UPL_stack
+  deriving (Show, Eq, Enum, Bounded)
 
 --------------------------------------------------------------------------------
 data HackageSettings = HackageSettings {
-    hackageUrl :: T.Text
-  , hackageUser :: T.Text
-  , hackagePwd  :: T.Text
+    hackageUrl  :: !T.Text
+  , hackageUser :: !T.Text
+  , hackageWhiteList :: [T.Text]
+  , hackagePrivatePackage :: !Bool
+  , hackagePwd  :: !T.Text
+  , hackageUploader :: Uploader
+  , hackageBuildDocs :: !Bool
   , hackagePackageName :: PackageName
-  , hackagePackageVersion :: T.Text
+  , hackagePackageVersion :: !T.Text
   } deriving Show
 
 
@@ -41,14 +51,17 @@ data UploadStatus = Uploaded | Skipped deriving Show
 
 --------------------------------------------------------------------------------
 hackageUpload :: HackageSettings -> IO ()
-hackageUpload settings = shelly $ verbosely $ do
+hackageUpload settings@HackageSettings{..} = shelly $ verbosely $ do
   status <- buildAndUploadPackage settings
-  uploadDocs status settings
+  when hackageBuildDocs $ uploadDocs status settings
 
 --------------------------------------------------------------------------------
 cabal :: [T.Text] -> Sh ()
 cabal = command_ "cabal" []
 
+--------------------------------------------------------------------------------
+stack :: [T.Text] -> Sh ()
+stack = command_ "stack" []
 
 --------------------------------------------------------------------------------
 htmlLocation :: HackageSettings -> T.Text
@@ -98,6 +111,10 @@ alreadyUploaded HackageSettings{..} = do
              hackagePackageName
              (T.unpack hackagePackageVersion)
 
+--------------------------------------------------------------------------------
+toUploader :: Uploader -> [T.Text] -> Sh ()
+toUploader UPL_cabal = cabal
+toUploader UPL_stack = stack
 
 --------------------------------------------------------------------------------
 buildAndUploadPackage :: HackageSettings -> Sh UploadStatus
@@ -106,26 +123,43 @@ buildAndUploadPackage settings@HackageSettings{..} = do
   if skipIt
     then return Skipped
     else do
-      cabal ["configure"]
-      cabal ["build"]
-      cabal ["sdist"]
+      let uploader = toUploader hackageUploader
+      when (hackageUploader == UPL_cabal) $ uploader ["configure"]
+      uploader ["build"]
+      uploader ["sdist"]
       echo "Stripping dev flags..."
       let fileName = fromString (hackagePackageName
                                  <> "-"
                                  <> T.unpack hackagePackageVersion)
-      chdir "dist" $ do
+      ddir <- distDir hackageUploader
+      chdir ddir $ do
         run_ "rm"  ["-rf", toTextIgnore fileName]
         run_ "tar" ["-xzf", toTextIgnore fileName <> ".tar.gz"]
         run_ "rm"  ["-rf", toTextIgnore fileName <> ".tar.gz"]
         chdir fileName (stripDevFlags settings)
         run_ "tar" ["-czf", toTextIgnore fileName <> ".tar.gz", toTextIgnore fileName]
         echo "Uploading package to Hackage..."
-        cabal ["upload", "-v3", "-u", hackageUser, "-p", hackagePwd, tarball fileName]
+        -- Use cabal for the final upload step. This is necessary
+        -- as stack does not allow you to specify things like user/pwd etc.
+        case (hackageUrl == "hackage.haskell.org" && hackagePrivatePackage ||
+             (hackageUrl `notElem` hackageWhiteList) && hackagePrivatePackage) of
+          True -> error "Cowardly refusing to upload: This package is marked as private."
+          False -> do
+            cabal ["upload", "-v3", "-u", hackageUser, "-p", hackagePwd, tarball fileName]
         return Uploaded
 
   where
     tarball fl = toTextIgnore fl <> ".tar.gz"
 
+    distDir :: Uploader -> Sh FilePath
+    distDir UPL_cabal = return "dist"
+    distDir UPL_stack = do
+      rw <- T.words . T.init <$> run "find" [".stack-work"
+                                            ,"-type", "d"
+                                            ,"-name", "build"]
+      case rw of
+        [] -> error "distDir UPL_stack: empty resultset!"
+        x:_ -> return . fromText . fst . T.breakOnEnd "/" $ x
 
 --------------------------------------------------------------------------------
 uploadDocs :: UploadStatus -> HackageSettings -> Sh ()

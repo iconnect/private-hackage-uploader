@@ -1,5 +1,5 @@
 name:                hackage-uploader
-version:             0.2.0.10
+version:             0.2.1.0
 description:         Upload a package on Hackage, building its docs
 license:             MIT
 license-file:        LICENSE
