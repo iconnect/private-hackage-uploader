@@ -82,9 +82,15 @@ contentsLocation HackageSettings{..} =
 
 
 --------------------------------------------------------------------------------
--- This is horrible, and hopefully will go away in the future.
-stripDevFlags :: HackageSettings -> Sh ()
-stripDevFlags HackageSettings{..} = do
+-- Strip the dev flags so that the package would pass `cabal sdist`.
+-- For stack we don't call this as those should be outsourced into the
+-- `stack.yaml` file.
+stripDevFlags :: Uploader -> HackageSettings -> Sh ()
+stripDevFlags UPL_stack _ =
+  echo $ "* Not stripping dev flags as stack has been detected as the uploader.\n" <>
+         "Please consider outsourcing flags like -Wall or -Werror into the stack.yaml manifest."
+stripDevFlags UPL_cabal HackageSettings{..} = do
+  echo "Stripping dev flags (if needed) ..."
   let manifest = T.pack hackagePackageName <> ".cabal"
   let bakFile  = manifest <> ".bak"
   let removeHpcIf = T.pack "/.*if.*flag.*(hpc).*$/d"
@@ -127,7 +133,6 @@ buildAndUploadPackage settings@HackageSettings{..} = do
       when (hackageUploader == UPL_cabal) $ uploader ["configure"]
       uploader ["build"]
       uploader ["sdist"]
-      echo "Stripping dev flags..."
       let fileName = fromString (hackagePackageName
                                  <> "-"
                                  <> T.unpack hackagePackageVersion)
@@ -136,7 +141,7 @@ buildAndUploadPackage settings@HackageSettings{..} = do
         run_ "rm"  ["-rf", toTextIgnore fileName]
         run_ "tar" ["-xzf", toTextIgnore fileName <> ".tar.gz"]
         run_ "rm"  ["-rf", toTextIgnore fileName <> ".tar.gz"]
-        chdir fileName (stripDevFlags settings)
+        chdir fileName (stripDevFlags hackageUploader settings)
         run_ "tar" ["-czf", toTextIgnore fileName <> ".tar.gz", toTextIgnore fileName]
         echo "Uploading package to Hackage..."
         -- Use cabal for the final upload step. This is necessary
@@ -153,18 +158,7 @@ buildAndUploadPackage settings@HackageSettings{..} = do
 
     distDir :: Uploader -> Sh FilePath
     distDir UPL_cabal = return "dist"
-    distDir UPL_stack = escaping False $ do
-      platform <- T.init <$> run "uname" ["-s"]
-      let os = case platform of
-            "Darwin" -> "osx"
-            _        -> "linux" -- win not supported atm.
-      rw <- T.words . T.init <$> run "find" [".stack-work"
-                                            ,"-type", "d"
-                                            ,"-regex"
-                                            , "'.*" <> os <> ".*/build'"]
-      case rw of
-        [] -> error "distDir UPL_stack: empty resultset!"
-        x:_ -> return . fromText . fst . T.breakOnEnd "/" $ x
+    distDir UPL_stack = escaping False (fromText . T.strip <$> run "stack" ["path", "--dist-dir"])
 
 --------------------------------------------------------------------------------
 uploadDocs :: UploadStatus -> HackageSettings -> Sh ()
