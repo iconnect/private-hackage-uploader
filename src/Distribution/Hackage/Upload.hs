@@ -17,6 +17,7 @@ import Prelude hiding (FilePath)
 import System.Directory
 import Shelly
 import Data.String
+import System.Info
 import Text.Printf
 import qualified Data.Text as T
 import Data.Monoid
@@ -142,7 +143,7 @@ buildAndUploadPackage settings@HackageSettings{..} = do
         run_ "tar" ["-xzf", toTextIgnore fileName <> ".tar.gz"]
         run_ "rm"  ["-rf", toTextIgnore fileName <> ".tar.gz"]
         chdir fileName (stripDevFlags hackageUploader settings)
-        run_ "tar" ["-czf", toTextIgnore fileName <> ".tar.gz", toTextIgnore fileName]
+        run_ "tar" (extraTarFlags <> ["-czf", toTextIgnore fileName <> ".tar.gz", toTextIgnore fileName])
         echo "Uploading package to Hackage..."
         -- Use cabal for the final upload step. This is necessary
         -- as stack does not allow you to specify things like user/pwd etc.
@@ -155,6 +156,11 @@ buildAndUploadPackage settings@HackageSettings{..} = do
 
   where
     tarball fl = toTextIgnore fl <> ".tar.gz"
+
+    extraTarFlags :: [T.Text]
+    extraTarFlags = case System.Info.os of
+      _        -> mempty
+      "linux"  -> ["--format=ustar"]
 
     distDir :: Uploader -> Sh FilePath
     distDir UPL_cabal = return "dist"
