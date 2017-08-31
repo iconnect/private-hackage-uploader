@@ -40,7 +40,7 @@ main = do
             , hackagePackageVersion = T.pack ver
          }
          hackageUpload settings
-     _ -> print "Usage: [url] pkgName version username pwd"
+     _ -> putStrLn "Usage: [url] pkgName version username pwd"
   where
    yesNoParse :: [String] -> Bool
    yesNoParse = all parseIt

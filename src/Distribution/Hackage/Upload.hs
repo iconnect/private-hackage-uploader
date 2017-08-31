@@ -157,14 +157,16 @@ buildAndUploadPackage settings@HackageSettings{..} = do
   where
     tarball fl = toTextIgnore fl <> ".tar.gz"
 
-    extraTarFlags :: [T.Text]
-    extraTarFlags = case System.Info.os of
-      _        -> mempty
-      "linux"  -> ["--format=ustar"]
+--------------------------------------------------------------------------------
+extraTarFlags :: [T.Text]
+extraTarFlags = case System.Info.os of
+  "linux"  -> ["--format=ustar"]
+  _        -> mempty
 
-    distDir :: Uploader -> Sh FilePath
-    distDir UPL_cabal = return "dist"
-    distDir UPL_stack = escaping False (fromText . T.strip <$> run "stack" ["path", "--dist-dir"])
+--------------------------------------------------------------------------------
+distDir :: Uploader -> Sh FilePath
+distDir UPL_cabal = return "dist"
+distDir UPL_stack = escaping False (fromText . T.strip <$> run "stack" ["path", "--dist-dir"])
 
 --------------------------------------------------------------------------------
 uploadDocs :: UploadStatus -> HackageSettings -> Sh ()
