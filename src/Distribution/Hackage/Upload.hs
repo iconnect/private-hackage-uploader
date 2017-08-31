@@ -85,25 +85,40 @@ contentsLocation HackageSettings{..} =
 --------------------------------------------------------------------------------
 -- Strip the dev flags so that the package would pass `cabal sdist`.
 -- For stack we don't call this as those should be outsourced into the
--- `stack.yaml` file.
+-- `stack.yaml` file. Exception has to be made for flags controlled by a flag,
+-- which apparently gets rejected nevertheless..
 stripDevFlags :: Uploader -> HackageSettings -> Sh ()
-stripDevFlags UPL_stack _ =
+stripDevFlags UPL_stack HackageSettings{..} = do
   echo $ "* Not stripping dev flags as stack has been detected as the uploader.\n" <>
          "Please consider outsourcing flags like -Wall or -Werror into the stack.yaml manifest."
+  let manifest = T.pack hackagePackageName <> ".cabal"
+  let bakFile  = manifest <> ".bak"
+  stripPerfAndTestFlags manifest bakFile
 stripDevFlags UPL_cabal HackageSettings{..} = do
   echo "Stripping dev flags (if needed) ..."
   let manifest = T.pack hackagePackageName <> ".cabal"
   let bakFile  = manifest <> ".bak"
+  stripCompilationFlags manifest bakFile
+  stripPerfAndTestFlags manifest bakFile
+
+--------------------------------------------------------------------------------
+-- | Strip things like "-Wall" and "-Werror" from the manifest.
+stripCompilationFlags :: T.Text -> T.Text -> Sh ()
+stripCompilationFlags manifest bakFile = do
+  let removeWError = T.pack "/.*-Werror.*$/d"
+  run_ "sed" ["-i.bak", removeWError, manifest]
+  run_ "rm" ["-rf", bakFile]
+
+--------------------------------------------------------------------------------
+-- | Strip things like "-fhpc".
+stripPerfAndTestFlags :: T.Text -> T.Text -> Sh ()
+stripPerfAndTestFlags manifest bakFile = do
   let removeHpcIf = T.pack "/.*if.*flag.*(hpc).*$/d"
   let removeHpc = T.pack "/.*ghc-options:.*-fhpc.*$/d"
-  let removeWError = T.pack "/.*-Werror.*$/d"
   run_ "sed" ["-i.bak", removeHpcIf, manifest]
   run_ "rm" ["-rf", bakFile]
   run_ "sed" ["-i.bak", removeHpc, manifest]
   run_ "rm" ["-rf", bakFile]
-  run_ "sed" ["-i.bak", removeWError, manifest]
-  run_ "rm" ["-rf", bakFile]
-
 
 --------------------------------------------------------------------------------
 alreadyUploaded :: HackageSettings -> Sh Bool
