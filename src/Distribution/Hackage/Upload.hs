@@ -33,7 +33,7 @@ data Uploader =
   deriving (Show, Eq, Enum, Bounded)
 
 --------------------------------------------------------------------------------
--- | A small subset of all available Hhackage paths and flags
+-- | A small subset of all available hackage paths and flags
 -- that can be specified to be used when uploading.
 data HackageSettings = HackageSettings {
     hackageUrl  :: !T.Text
