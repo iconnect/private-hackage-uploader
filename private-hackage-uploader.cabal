@@ -1,4 +1,4 @@
-name:                hackage-uploader
+name:                private-hackage-uploader
 version:             0.2.2.0
 description:         Upload a package on Hackage, building its docs
 license:             MIT
@@ -26,7 +26,7 @@ library
       shelly >= 1.5.0,
       text >= 0.11
 
-executable hackage-uploader
+executable private-hackage-uploader
   hs-source-dirs:
       src
   main-is:
@@ -39,4 +39,4 @@ executable hackage-uploader
         text >= 0.11,
         shelly >= 1.5.0,
         directory >= 1.2.0.1,
-        hackage-uploader >= 0.2.0.9
+        private-hackage-uploader >= 0.2.0.9

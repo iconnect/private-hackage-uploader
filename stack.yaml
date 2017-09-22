@@ -32,4 +32,4 @@ extra-package-dbs: []
 # extra-lib-dirs: [/path/to/dir]
 
 ghc-options:
-  hackage-uploader: -Wall -Werror
+  private-hackage-uploader: -Wall -Werror
