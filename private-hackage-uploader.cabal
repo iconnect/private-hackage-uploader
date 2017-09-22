@@ -1,7 +1,7 @@
 name:                private-hackage-uploader
 version:             0.2.3.0
-description:         Upload a package on Hackage, building its docs
-description:         An opinionated utility that uploads a package on Hackage, building its docs
+synopsis:            Upload a package to the public or private hackage, building its docs
+description:         An opinionated utility that uploads a package to a private or public hackage, building its docs
 bug-reports:         https://github.com/iconnect/hackage-uploader/issues
 license:             MIT
 license-file:        LICENSE
