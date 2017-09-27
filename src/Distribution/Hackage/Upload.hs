@@ -3,7 +3,7 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 {-# OPTIONS_GHC -fno-warn-unused-imports #-}
 {-# OPTIONS_GHC -fno-warn-unused-binds #-}
-
+-- | Upload a package to the public or private hackage, building its docs.
 module Distribution.Hackage.Upload
        ( HackageSettings(..)
        , UploadStatus(..)
@@ -33,6 +33,8 @@ data Uploader =
   deriving (Show, Eq, Enum, Bounded)
 
 --------------------------------------------------------------------------------
+-- | A small subset of all available hackage paths and flags
+-- that can be specified to be used when uploading.
 data HackageSettings = HackageSettings {
     hackageUrl  :: !T.Text
   , hackageUser :: !T.Text
@@ -51,6 +53,7 @@ data UploadStatus = Uploaded | Skipped deriving Show
 
 
 --------------------------------------------------------------------------------
+-- | Upload a package with the specified hackage settings.
 hackageUpload :: HackageSettings -> IO ()
 hackageUpload settings@HackageSettings{..} = shelly $ verbosely $ do
   status <- buildAndUploadPackage settings
@@ -139,6 +142,7 @@ toUploader UPL_cabal = cabal
 toUploader UPL_stack = stack
 
 --------------------------------------------------------------------------------
+-- | Build a package and upload it.
 buildAndUploadPackage :: HackageSettings -> Sh UploadStatus
 buildAndUploadPackage settings@HackageSettings{..} = do
   skipIt <- alreadyUploaded settings
@@ -184,6 +188,12 @@ distDir UPL_cabal = return "dist"
 distDir UPL_stack = escaping False (fromText . T.strip <$> run "stack" ["path", "--dist-dir"])
 
 --------------------------------------------------------------------------------
+-- | Create and upload haddocks of a package.
+--
+-- This uses the old method that should work with old cabals and
+-- old hackage servers. TODO: update it to the method used in @cabal upload@
+-- or perhaps switch to @cabal upload@ altogether as soon as in handles
+-- private hackage servers and more options.
 uploadDocs :: UploadStatus -> HackageSettings -> Sh ()
 uploadDocs status settings@HackageSettings{..} =
   case status of
